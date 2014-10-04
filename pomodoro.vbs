@@ -23,21 +23,23 @@
 
 
 'Configure these for your likings
-Dim alarm, minute, pomodoroTime, snoozeTime
+Dim alarm, minute, pomodoroTime, snoozeTime, soundFile, alarmPlayer
 alarm        = False
 minute       = 60 * 1000
 pomodoroTime = 25 * minute
 snoozeTime   =  5 * minute
 
 Set objShell = CreateObject("WScript.Shell")
+Set alarmPlayer = CreateObject("WMPlayer.OCX")
 Call Main
+alarmPlayer.close
 Set objShell = Nothing
 
 Sub Main
     Call CheckArgs
     If alarm Then
         Set WshSysEnv = objShell.Environment("PROCESS")
-        soundFile = WshSysEnv("WINDIR") & "\Media\ringin.wav"  'Alarm ringtone
+        soundFile = WshSysEnv("WINDIR") & "\Media\notify.wav"  'Alarm ringtone
         Set WshSysEnv = Nothing
     End If
     dummy = objShell.Popup("Pomodoro started", 1, "", 0 + 64)    
@@ -57,13 +59,10 @@ End Sub
 
 'Pomodoro time done - give options to finish or snooze
 Sub Finished
-    Dim btnCode
-    Dim title
-    Dim postponed
+    Dim btnCode, title, postponed
     Do Until btnCode = 6
         If alarm Then
-          'WScript.Echo "Alarm would be enabled"
-          'Call PlayAlarm
+            Call PlayAlarm
         End If
         title = "Time's up"
         If postponed > 0 Then
@@ -82,7 +81,5 @@ End Sub
 
 'Play alarm sound
 Sub PlayAlarm
-    command = "sndrec32 /play /close " & chr(34) & soundFile & chr(34)
-    objShell.Run command, 0, False
-    WScript.Sleep 100
+    alarmPlayer.URL = soundFile
 End Sub
